@@ -1,0 +1,84 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="app">
+    <v-app id="inspire">
+        <v-row dense>
+            <v-col cols="12">
+                <v-card light>
+                    <v-card-title class="headline">Remote control</v-card-title>
+                    <v-container fluid>
+                        <v-row align="center">
+                            <v-col cols="12">
+                                <v-text-field label="Dispositivo"
+                                              v-model="device">
+                                </v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field label="URL"
+                                              v-model="url">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <v-card-actions>
+                        <v-btn @@click="sendCommand">
+                            Enviar
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-col>
+        </v-row>
+    </v-app>
+</div>
+
+@section Scripts{
+    <script>
+        let app = new Vue({
+            el: '#app',
+            vuetify: new Vuetify(),
+            data: {
+                device: "",
+                url: ""
+            },
+            methods: {
+                sendCommand: function () {
+                    axios.post('/commands', {
+                        device: app._data.device,
+                        url: app._data.url
+                    })
+                        .then(function (response) {
+                            app._data.device = '';
+                            app._data.url = '';
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                }
+            }
+        });
+        function initMap() {
+            let centerMap = { lat: -25.344, lng: 131.036 };
+            let bodyHeight = window.innerHeight;
+            let headerHeight = document.getElementsByTagName('header')[0].offsetHeight;
+            let footerHeight = document.getElementsByTagName('footer')[0].offsetHeight;
+            document.getElementById('map').style.height = `${bodyHeight - headerHeight - footerHeight - 40}px`;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    centerMap = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                }, function () { });
+            }
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 4,
+                center: centerMap
+            });
+            var bounds = new google.maps.LatLngBounds();
+            app.initMap(map, bounds, centerMap);
+        }
+    </script>
+
+}
